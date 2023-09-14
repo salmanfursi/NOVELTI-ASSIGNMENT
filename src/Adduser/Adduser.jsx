@@ -1,86 +1,160 @@
-import { useState } from 'react';
-import { Country, State, City } from 'country-state-city';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css'; // Import the CSS for styling
+
+
+
+import { useEffect, useState } from 'react';
+import { Country, State } from 'country-state-city';
+import Select from 'react-select';
+
 
 const Adduser = () => {
-  // Initialize state variables
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
 
-  console.log(State.getStatesOfCountry());
-
-  // console.log(selectedCountry);
-
-  // Get a list of all states
-  const allStates = State.getAllStates();
-
-  const filteredStates = allStates.filter((state) => state.countryCode === selectedCountry);
-
-
-
-
-
-
-  // Get a list of all countries
+  // Country selection state
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const countries = Country.getAllCountries();
+  const handleCountryChange = (selectedOption) => {
+    setSelectedCountry(selectedOption);
+  };
+  // State selection state
+  const [selectedCity, setSelectedCity] = useState(null);
+  const allStates = State.getAllStates();
+  
+  const filteredStates = allStates.filter((state) => state.countryCode === selectedCountry?.value);
+  const handleCityChange = (selectedOption) => {
+    setSelectedCity(selectedOption);
+  };
+  //phone number state
+  const [phoneNumber, setPhoneNumber] = useState('');
+  //zip code state
+  const [zipCode, setZipCode] = useState('');
 
-  // Get a list of cities for the selected country
-  // const countryCities = selectedCountry
-  //   ? State.getStatesOfCountry(selectedCountry)
+  // Separate state variables for selected country and state names
+  const [selectedCountryName, setSelectedCountryName] = useState('');
+  const [selectedStateName, setSelectedStateName] = useState('');
 
-  //   : [];
+  // phone number handler
+  const handlePhoneNumberChange = (value) => {
+    // setPhoneNumber(value);
+    const phoneNumberString = String(value);
+    setPhoneNumber(phoneNumberString);
+  };
+  //zip code handler
+  const handleZipCodeChange = (e) => {
+    const value = e.target.value;
 
-  // Handle country selection
-  const handleCountryChange = (e) => {
-    const countryCode = e.target.value;
-    setSelectedCountry(countryCode);
-    // setSelectedCountry(e.target.value);
-
-    // Clear the selected city when the country changes
-    setSelectedCity('');
+    // Check if the value is a number
+    if (!isNaN(value) || value === '') {
+      setZipCode(value);
+    }
   };
 
-  // Handle city selection
-  const handleCityChange = (e) => {
-    setSelectedCity(e.target.value);
+
+  // form submit handler all will be submit
+  const handleSubmitForm = (e) => {
+    e.preventDefault();
+    if (isValidPhoneNumber(phoneNumber)) {
+      // Valid phone number
+      console.log('Valid phone number:', phoneNumber);
+    } else {
+      // Invalid phone number
+      alert('Invalid phone number:', phoneNumber);
+    }
+
+    const form = e.target;
+    const countryName = selectedCountryName;
+    const stateName = selectedStateName;
+    const phone = phoneNumber;
+    const zipcode =zipCode
+    // const user ={countryName, stateName, phone,zipcode}
+    console.log(countryName, stateName, phone,zipcode);
   };
+
+  // Update selected country and state names when options change
+  useEffect(() => {
+    if (selectedCountry) {
+      setSelectedCountryName(selectedCountry.label);
+    } else {
+      setSelectedCountryName('');
+    }
+    if (selectedCity) {
+      setSelectedStateName(selectedCity.label);
+    } else {
+      setSelectedStateName('');
+    }
+  }, [selectedCountry, selectedCity]);
 
   return (
-    <div>
-      <label>Select a Country:</label>
-      <select value={selectedCountry} onChange={handleCountryChange}>
-        <option value="">Select</option>
-        {countries.map((country) => (
-          <option key={country.id} value={country.isoCode}>
-            {country.name}
-          </option>
-        ))}
-      </select>
+    <form onSubmit={handleSubmitForm}>
+      {/* Country Selection div */}
+      <div className="form-control">
+        <label htmlFor="country">Country:</label>
+        <Select
+          id="country"
+          name="country"
+          value={selectedCountry}
+          onChange={handleCountryChange}
+          options={countries.map((country) => ({
+            label: country.name,
+            value: country.isoCode,
+          }))}
+          placeholder="Select a Country"
+          isSearchable={true}
+        />
+      </div>
 
-      {selectedCountry && (
-        <div>
-          <label>Select a City:</label>
-          <select value={selectedCity} onChange={handleCityChange}>
-            <option value="">Select</option>
-            {/* {countryCities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))} */}
+      {/* State Selection div */}
+      <div className="form-control">
+        <label htmlFor="state">State:</label>
+        {selectedCountry && (
+          <Select
+            id="state"
+            name="state"
+            value={selectedCity}
+            onChange={handleCityChange}
+            options={filteredStates.map((state) => ({
+              label: state.name,
+              value: state.id,
+            }))}
+            placeholder="Select a City"
+            isSearchable={true}
+          />
+        )}
+      </div>
+      {/* phone number div */}
+      <div className="form-control">
+        <label htmlFor="phone">Phone Number:</label>
+        <PhoneInput
+          id="phone"
+          name="phone"
+          placeholder="Enter phone number"
+          value={phoneNumber}
+          onChange={handlePhoneNumberChange}
+          defaultCountry="US" // Set the default country code (e.g., 'US' for United States)
+        />
+      </div>
+      {/* zip code div */}
+      <div className="form-control">
+        <label htmlFor="zipCode">Zip Code:</label>
+        <input
+          type="text"
+          id="zipCode"
+          name="zipCode"
+          value={zipCode}
+          onChange={handleZipCodeChange}
+          placeholder="Enter Zip Code"
+        />
+      </div>
 
 
-            {filteredStates.map((state) => (
-              <option key={state.id} value={state.id}>
-                <h1>{state.name}</h1>
-              </option>
-            ))}
 
 
 
-          </select>
-        </div>
-      )}
-    </div>
+
+      {/* Submit Button */}
+      <button className='btn w-full btn-warning' type="submit">Submit</button>
+    </form>
   );
-}
+};
 
 export default Adduser;

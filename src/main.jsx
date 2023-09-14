@@ -4,6 +4,7 @@ import App from './App.jsx'
 import './index.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Adduser from './Adduser/Adduser.jsx';
+import CountryState from './Adduser/Form/CountryState.jsx';
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: "/adduser",
         element:<Adduser></Adduser>
+      },
+      {
+        path: "/demo",
+        element:<CountryState></CountryState>
       }
     ]
   },

@@ -1,58 +1,118 @@
 import { useState } from 'react';
-import {Country,State,City} from 'country-state-city';
+import { Country, State } from 'country-state-city';
+const CountryState = () => {
+   // country and state start
+   const [selectedCountry, setSelectedCountry] = useState('');
+   const [selectedCity, setSelectedCity] = useState('');
 
-const  Adduser= ()=> {
-  // Initialize state variables
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+   console.log(State.getStatesOfCountry());
+   const allStates = State.getAllStates();
+   const filteredStates = allStates.filter((state) => state.countryCode === selectedCountry);
+   const countries = Country.getAllCountries();
 
-  // Get a list of all countries
+   const handleCountryChange = (e) => {
+      const countryCode = e.target.value;
+      setSelectedCountry(countryCode);
+      setSelectedCity('');
+   };
+   const handleCityChange = (e) => {
+      setSelectedCity(e.target.value);
+   };
+   // country and state finish
+
+   return (
+      <div className='form-control'>
+         <label>Select a Country:</label>
+         <select className='select select-success w-full max-w-xs flex' value={selectedCountry} onChange={handleCountryChange}>
+            <option value="">Select</option>
+            {countries.map((country) => (
+               <option name='country' key={country.id} value={country.isoCode}>
+                  {country.name}
+               </option>
+            ))}
+         </select>
+
+         {selectedCountry && (
+            <div>
+               <label>Select a City:</label>
+               <select className='select select-success w-full max-w-xs flex' value={selectedCity} onChange={handleCityChange} >
+                  {filteredStates.map((state) => (
+                     <option name="state" key={state.id} value={state.id}>
+                        <h1>{state.name}</h1>
+                     </option>
+                  ))}
+               </select>
+            </div>
+         ) || (
+               <div>
+                  <label>Select a City:</label>
+                  <select className='select select-success w-full max-w-xs md:flex' value={selectedCity} onChange={handleCityChange}>
+                     <option><h1>Select a Country first</h1></option>
+                  </select>
+               </div>
+
+            )
+         }
+      </div>
+   );
+};
+
+export default CountryState;
+
+
+
+
+import { useState } from 'react';
+import { Country, State } from 'country-state-city';
+import Select from 'react-select';
+
+const CountryState = () => {
+  // Country selection state
+  const [selectedCountry, setSelectedCountry] = useState(null); // Use null for react-select
   const countries = Country.getAllCountries();
 
-  // Get a list of cities for the selected country
-  const countryCities = selectedCountry
-    ? City.getCitiesOfCountry(selectedCountry)
-    : [selectedCountry];
-
-  // Handle country selection
-  const handleCountryChange = (e) => {
-    setSelectedCountry(e.target.value);
-    // Clear the selected city when the country changes
-    setSelectedCity('');
+  const handleCountryChange = (selectedOption) => {
+    setSelectedCountry(selectedOption);
   };
 
-  // Handle city selection
-  const handleCityChange = (e) => {
-    setSelectedCity(e.target.value);
+  // State selection state
+  const [selectedCity, setSelectedCity] = useState(null); // Use null for react-select
+  const allStates = State.getAllStates();
+  const filteredStates = allStates.filter((state) => state.countryCode === selectedCountry?.value);
+
+  const handleCityChange = (selectedOption) => {
+    setSelectedCity(selectedOption);
   };
 
   return (
     <div>
-      <label>Select a Country:</label>
-      <select value={selectedCountry} onChange={handleCountryChange}>
-        <option value="">Select</option>
-        {countries.map((country) => (
-          <option key={country.id} value={country.id}>
-            {country.name}
-          </option>
-        ))}
-      </select>
+      {/* Country Selection */}
+      <Select
+        value={selectedCountry}
+        onChange={handleCountryChange}
+        options={countries.map((country) => ({
+          label: country.name,
+          value: country.isoCode,
+        }))}
+        placeholder="Select a Country"
+        isSearchable={true} // Make it searchable
+      />
 
+      {/* State Selection */}
       {selectedCountry && (
-        <div>
-          <label>Select a City:</label>
-          <select value={selectedCity} onChange={handleCityChange}>
-            <option value="">Select</option>
-            {countryCities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          value={selectedCity}
+          onChange={handleCityChange}
+          options={filteredStates.map((state) => ({
+            label: state.name,
+            value: state.id,
+          }))}
+          placeholder="Select a City"
+          isSearchable={true} // Make it searchable
+        />
       )}
     </div>
   );
-}
+};
 
-export default Adduser;
+export default CountryState;
