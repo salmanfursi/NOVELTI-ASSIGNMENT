@@ -7,6 +7,7 @@ import Select from 'react-select';
 
 // import zipcode from 'zipcode';
 import axios from 'axios'; // You may need to install axios
+import Address from './Form/Address';
 
 
 const Adduser = () => {
@@ -41,9 +42,8 @@ const Adduser = () => {
     // setPhoneNumber(value);
     const phoneNumberString = String(value);
     setPhoneNumber(phoneNumberString);
+
   };
-
-
 
 
   //zip code handler
@@ -73,10 +73,32 @@ const Adduser = () => {
     }
   };
 
+  //email state and handler
+  const [email, setEmail] = useState('');
+  const [isValidEmail, setIsValidEmail] = useState(true);
+
+  const handleEmailChange = (e) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    // Email validation using a simple regex pattern
+    const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    setIsValidEmail(emailPattern.test(newEmail));
+  };
+
+  //address state and handler
+  const [address, setAddress] = useState('');
+
+  console.log(address);
+
+  const handleAddressChange = (newAddress) => {
+    setAddress(newAddress);
+    console.log('Address in parent component:', newAddress);
+  };
 
 
-  // Check if the value is a number
-  //};
+
+
+
 
 
   // form submit handler all will be submit
@@ -90,17 +112,16 @@ const Adduser = () => {
       // Invalid phone number
       alert('Invalid phone number:', phoneNumber);
     }
-    //zip code logic
-
-
-
+  
     //submission logic
     const form = e.target;
     const countryName = selectedCountryName;
     const stateName = selectedStateName;
     const phone = phoneNumber;
     const zip = zipCode
-    const user = { countryName, stateName, phone, zip }
+    const gmail = email
+    const addres = address;
+    const user = { countryName, stateName, phone, zip, gmail,addres}
     console.log(user);
   };
 
@@ -120,6 +141,47 @@ const Adduser = () => {
 
   return (
     <form onSubmit={handleSubmitForm}>
+
+      {/* first name validation */}
+
+      {/* last name validation */}
+
+
+      {/* email validation */}
+      <div className="form-control">
+        <label htmlFor="email">Email Id:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={email}
+          onChange={handleEmailChange}
+          placeholder="Enter your email"
+        />
+        {!isValidEmail && (
+          <p className="text-red-500">Invalid email address.</p>
+        )}
+      </div>
+
+      {/* phone number div */}
+      <div className="form-control">
+        <label htmlFor="phone">Phone Number:</label>
+        <PhoneInput
+          id="phone"
+          name="phone"
+          placeholder="Enter phone number"
+          value={phoneNumber}
+          onChange={handlePhoneNumberChange}
+          defaultCountry="US"
+        />
+      </div>
+
+      {/* address 1 div */}
+      <Address onAddressChange={handleAddressChange} />
+
+      {/* address 2 optional div */}
+      
+
       {/* Country Selection div */}
       <div className="form-control">
         <label htmlFor="country">Country:</label>
@@ -155,18 +217,7 @@ const Adduser = () => {
           />
         )}
       </div>
-      {/* phone number div */}
-      <div className="form-control">
-        <label htmlFor="phone">Phone Number:</label>
-        <PhoneInput
-          id="phone"
-          name="phone"
-          placeholder="Enter phone number"
-          value={phoneNumber}
-          onChange={handlePhoneNumberChange}
-          defaultCountry="US" // Set the default country code (e.g., 'US' for United States)
-        />
-      </div>
+
       {/* zip code div */}
       <div className="form-control">
         <label htmlFor="zipCode">Zip Code:</label>
@@ -177,17 +228,16 @@ const Adduser = () => {
           value={zipCode}
           onChange={handleZipCodeChange}
           placeholder="Enter US zip code only"
-          // Add a key based on the ZIP code
+        // Add a key based on the ZIP code
         />
+        {location?.state ? (
+          <div>
+            {location?.state && <p className='text-green-700 font-bold'>Valid ZIP code Location: {location.city}, {location.state}</p>}
+          </div>
+        ) : (
+          <p className='text-red-500 font-bold'>Please use a valid US ZIP code (5 digits)(30002 ,99950).</p>
+        )}
       </div>
-      {/* zip validation */}
-      {location?.state ? (
-        <div>
-          {location?.state && <p className='text-green-700 font-bold'>Valid ZIP code Location: {location.city}, {location.state}</p>}
-        </div>
-      ) : (
-        <p className='text-red-500 font-bold'>Invalid ZIP code. Please use a valid US ZIP code (5 digits).</p>
-      )}
 
 
 

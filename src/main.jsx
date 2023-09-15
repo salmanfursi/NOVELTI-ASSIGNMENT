@@ -4,7 +4,7 @@ import App from './App.jsx'
 import './index.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Adduser from './Adduser/Adduser.jsx';
-import CountryState from './Adduser/Form/CountryState.jsx';
+import Address from './Adduser/Form/Address.jsx';
 
 const router = createBrowserRouter([
   {
@@ -21,7 +21,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/demo",
-        element:<CountryState></CountryState>
+        element:<Address></Address>
       }
     ]
   },
