@@ -1,11 +1,12 @@
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css'; // Import the CSS for styling
 
-
-
 import { useEffect, useState } from 'react';
 import { Country, State } from 'country-state-city';
 import Select from 'react-select';
+
+// import zipcode from 'zipcode';
+import axios from 'axios'; // You may need to install axios
 
 
 const Adduser = () => {
@@ -19,15 +20,17 @@ const Adduser = () => {
   // State selection state
   const [selectedCity, setSelectedCity] = useState(null);
   const allStates = State.getAllStates();
-  
+
   const filteredStates = allStates.filter((state) => state.countryCode === selectedCountry?.value);
   const handleCityChange = (selectedOption) => {
     setSelectedCity(selectedOption);
   };
   //phone number state
   const [phoneNumber, setPhoneNumber] = useState('');
-  //zip code state
+  //zipCode state
   const [zipCode, setZipCode] = useState('');
+  const [isValid, setIsValid] = useState(false);
+  const [location, setLocation] = useState(null);
 
   // Separate state variables for selected country and state names
   const [selectedCountryName, setSelectedCountryName] = useState('');
@@ -39,20 +42,47 @@ const Adduser = () => {
     const phoneNumberString = String(value);
     setPhoneNumber(phoneNumberString);
   };
+
+
+
+
   //zip code handler
   const handleZipCodeChange = (e) => {
-    const value = e.target.value;
+    const newZipCode = e.target.value;
 
-    // Check if the value is a number
-    if (!isNaN(value) || value === '') {
-      setZipCode(value);
+    // Check if the newZipCode is a number or empty before setting it
+    if (!isNaN(newZipCode) || newZipCode === '') {
+      setZipCode(newZipCode);
+      setLocation(null);
+
+      // Make an API request to validate the ZIP code using Zippopotam
+      axios
+        .get(`https://api.zippopotam.us/us/${newZipCode}`)
+        .then((response) => {
+          const isValid = response.status === 200;
+          setIsValid(isValid);
+          if (isValid) {
+            // Fetch additional location data if needed
+            setLocation(response.data.places[0]); // Assuming you want to display the first matching place
+          }
+        })
+        .catch((error) => {
+          // Handle API request errors here
+          console.error(error);
+        });
     }
   };
+
+
+
+  // Check if the value is a number
+  //};
 
 
   // form submit handler all will be submit
   const handleSubmitForm = (e) => {
     e.preventDefault();
+    //phone number logics
     if (isValidPhoneNumber(phoneNumber)) {
       // Valid phone number
       console.log('Valid phone number:', phoneNumber);
@@ -60,14 +90,18 @@ const Adduser = () => {
       // Invalid phone number
       alert('Invalid phone number:', phoneNumber);
     }
+    //zip code logic
 
+
+
+    //submission logic
     const form = e.target;
     const countryName = selectedCountryName;
     const stateName = selectedStateName;
     const phone = phoneNumber;
-    const zipcode =zipCode
-    // const user ={countryName, stateName, phone,zipcode}
-    console.log(countryName, stateName, phone,zipcode);
+    const zip = zipCode
+    const user = { countryName, stateName, phone, zip }
+    console.log(user);
   };
 
   // Update selected country and state names when options change
@@ -142,12 +176,18 @@ const Adduser = () => {
           name="zipCode"
           value={zipCode}
           onChange={handleZipCodeChange}
-          placeholder="Enter Zip Code"
+          placeholder="Enter US zip code only"
+          // Add a key based on the ZIP code
         />
       </div>
-
-
-
+      {/* zip validation */}
+      {location?.state ? (
+        <div>
+          {location?.state && <p className='text-green-700 font-bold'>Valid ZIP code Location: {location.city}, {location.state}</p>}
+        </div>
+      ) : (
+        <p className='text-red-500 font-bold'>Invalid ZIP code. Please use a valid US ZIP code (5 digits).</p>
+      )}
 
 
 
